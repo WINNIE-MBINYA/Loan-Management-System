@@ -1,7 +1,7 @@
 package com.loanmanagement.Controller;
 
-import com.example.loanmanagement.entity.Customer;
-import com.example.loanmanagement.service.CustomerService;
+import com.loanmanagement.Entity.Customer;
+import com.loanmanagement.Service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
