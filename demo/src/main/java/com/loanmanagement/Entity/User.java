@@ -12,7 +12,7 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor(force = true)  // ✅ Force Lombok to generate a constructor for final fields
+@NoArgsConstructor(force = true)
 @AllArgsConstructor
 public class User implements UserDetails {
 
