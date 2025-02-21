@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/loan_management
-    username: root
-    password: password
+    username: Winnie
+    password: W!nf379!
   jpa:
     hibernate:
       ddl-auto: update
