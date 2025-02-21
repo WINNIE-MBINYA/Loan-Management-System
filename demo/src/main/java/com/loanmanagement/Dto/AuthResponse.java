@@ -1,12 +1,13 @@
 package com.loanmanagement.Dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class AuthResponse {
-    private String token;
+
+    // Manually add constructor
+    public AuthResponse(String token) {
+    }
 }
