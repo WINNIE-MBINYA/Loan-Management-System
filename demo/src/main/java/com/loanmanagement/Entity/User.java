@@ -12,7 +12,7 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(force = true)  // ✅ Force Lombok to generate a constructor for final fields
 @AllArgsConstructor
 public class User implements UserDetails {
 
@@ -20,11 +20,11 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private final Role role;
 
     public User(String username, String password, Role role) {
         this.username = username;
@@ -43,7 +43,7 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getPassword() {  // ✅ Add this method to resolve the error
+    public String getPassword() {
         return password;
     }
 
