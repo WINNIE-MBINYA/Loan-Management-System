@@ -6,15 +6,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor  // ✅ This automatically creates a constructor for final fields
+@RequiredArgsConstructor
 public class JwtService {
 
     private final JwtUtil jwtUtil;
-
-    // ❌ REMOVE the manually defined constructor - it's redundant
-    // public JwtService(JwtUtil jwtUtil) {
-    //     this.jwtUtil = jwtUtil;
-    // }
 
     public String generateToken(UserDetails userDetails) {
         return jwtUtil.generateToken(userDetails);
