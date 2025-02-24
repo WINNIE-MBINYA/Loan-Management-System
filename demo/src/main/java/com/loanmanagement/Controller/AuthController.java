@@ -5,25 +5,28 @@ import com.loanmanagement.Dto.AuthResponse;
 import com.loanmanagement.Dto.RegisterRequest;
 import com.loanmanagement.Service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@CrossOrigin
 public class AuthController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        AuthResponse authResponse = authenticationService.register(request);
-        System.out.println(authResponse);
-        return ResponseEntity.ok(authenticationService.register(request));
+    @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        String resp = authenticationService.register(request);
+        System.out.println(resp);
+        return ResponseEntity.ok().body(resp);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+        System.out.println(request);
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 }

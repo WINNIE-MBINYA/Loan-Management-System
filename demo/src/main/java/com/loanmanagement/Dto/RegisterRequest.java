@@ -1,10 +1,16 @@
 package com.loanmanagement.Dto;
 
 import com.loanmanagement.Entity.Role;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
 public class RegisterRequest {
     private String username;
     private String password;
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     public RegisterRequest() {}
@@ -15,24 +21,12 @@ public class RegisterRequest {
         this.role = role;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
     public void setUsername(String username) {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
     }
 
     public void setRole(Role role) {

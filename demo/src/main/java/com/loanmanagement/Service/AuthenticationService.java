@@ -1,7 +1,6 @@
 package com.loanmanagement.Service;
 
 import com.loanmanagement.Dto.AuthRequest;
-import com.loanmanagement.Dto.AuthResponse;
 import com.loanmanagement.Dto.RegisterRequest;
 import com.loanmanagement.Entity.User;
 import com.loanmanagement.Repository.UserRepository;
@@ -22,28 +21,24 @@ public class AuthenticationService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
 
-    public AuthResponse register(RegisterRequest request) {
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("User already exists!"); // Prevent duplicate users
-        }
-
+    public String register(RegisterRequest request) {
         User user = new User(request.getUsername(), passwordEncoder.encode(request.getPassword()), request.getRole());
         userRepository.save(user);
-        String token = jwtUtil.generateToken(user);
 
-        return new AuthResponse(token);
+        // Generate JWT Token for the registered user
+        return jwtUtil.generateToken(user);
     }
 
-    public AuthResponse authenticate(AuthRequest request) {
+    public String authenticate(AuthRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
 
-        UserDetails userDetails = userRepository.findByUsername(request.getUsername())
+        // Retrieve the user from the database
+        User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String token = jwtUtil.generateToken(userDetails);
-
-        return new AuthResponse(token);
+        // Generate JWT Token for the authenticated user
+        return jwtUtil.generateToken(user);
     }
 }
