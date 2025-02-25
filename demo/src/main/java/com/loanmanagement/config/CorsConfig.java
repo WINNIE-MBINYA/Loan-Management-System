@@ -15,12 +15,13 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**") // Apply CORS to all API endpoints
                         .allowedOrigins(
-                                "http://localhost:4200",  // My machine
-                                "http://172.16.1.107:4200" // My colleague's machine
+                                  "*"
+//                                "http://localhost:4200",  // My machine
+//                                "http://172.16.1.107:4200"  // My colleague's machine
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowCredentials(false);
             }
         };
     }
