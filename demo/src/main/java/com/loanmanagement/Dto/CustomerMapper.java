@@ -1,4 +1,4 @@
-package com.loanmanagement.Mapper;
+package com.loanmanagement.Dto;
 
 import com.loanmanagement.Dto.CustomerDTO;
 import com.loanmanagement.Entity.Customer;
