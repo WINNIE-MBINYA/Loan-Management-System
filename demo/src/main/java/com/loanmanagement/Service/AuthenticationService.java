@@ -3,12 +3,12 @@ package com.loanmanagement.Service;
 import com.loanmanagement.Dto.AuthRequest;
 import com.loanmanagement.Dto.RegisterRequest;
 import com.loanmanagement.Entity.User;
+import com.loanmanagement.Exception.UserNotFoundException;
 import com.loanmanagement.Repository.UserRepository;
 import com.loanmanagement.config.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,21 +22,37 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public String register(RegisterRequest request) {
-        User user = new User(request.getUsername(), passwordEncoder.encode(request.getPassword()), request.getRole());
+        // Encode password
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        // Log registration attempt
+        System.out.println("Registering user: " + request.getUsername() + ", Encoded password: " + encodedPassword);
+
+        // Create and save user
+        User user = new User(request.getUsername(), encodedPassword, request.getRole());
         userRepository.save(user);
 
-        // Generate JWT Token for the registered user
-        return jwtUtil.generateToken(user);
+        return "Registration successful";
     }
 
     public String authenticate(AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+        try {
+            // Log authentication attempt
+            System.out.println("Authenticating user: " + request.getUsername());
+
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+
+        } catch (Exception e) {
+            // Log authentication failure
+            System.err.println("Authentication failed for username: " + request.getUsername());
+            throw e; // Rethrow the exception for further handling
+        }
 
         // Retrieve the user from the database
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User " + request.getUsername() + " not found!"));
 
         // Generate JWT Token for the authenticated user
         return jwtUtil.generateToken(user);
