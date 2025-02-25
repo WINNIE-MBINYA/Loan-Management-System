@@ -9,4 +9,8 @@ spring:
     show-sql: true
   security:
     jwt:
-      secret: my-secret-key
+      secret: "my_super_long_very_secure_secret_key_that_is_32_bytes_long"
+
+server:
+  port: 8080
+  address: 0.0.0.0  # Allows access from other devices in the network
