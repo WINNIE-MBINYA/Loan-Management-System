@@ -1,45 +1,57 @@
 package com.loanmanagement.Controller;
 
-import com.loanmanagement.Entity.Customer;
+import com.loanmanagement.Dto.CustomerDTO;
+import com.loanmanagement.Dto.CustomerMapper;
 import com.loanmanagement.Service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/customers")
 @RequiredArgsConstructor
+@CrossOrigin
 public class CustomerController {
 
     private final CustomerService customerService;
 
     @GetMapping("/getAllCustomers")
-    public List<Customer> getAllCustomers() {
-        return customerService.getAllCustomers();
+    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
+        List<CustomerDTO> customers = customerService.getAllCustomers()
+                .stream()
+                .map(CustomerMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(customers);
     }
 
     @GetMapping("/getCustomer/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
         return customerService.getCustomerById(id)
-                .map(ResponseEntity::ok)
+                .map(customer -> ResponseEntity.ok(CustomerMapper.toDTO(customer)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/createCustomer")
-    public Customer createCustomer(@RequestBody Customer customer) {
-        return customerService.createCustomer(customer);
+    public ResponseEntity<String> createCustomer(@RequestBody CustomerDTO customerDTO) {
+        log.info("Creating customer: {}", customerDTO);
+        customerService.createCustomer(CustomerMapper.toEntity(customerDTO));
+        return ResponseEntity.ok("Customer created successfully");
     }
 
     @PutMapping("/updateCustomer/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
-        return ResponseEntity.ok(customerService.updateCustomer(id, customer));
+    public ResponseEntity<String> updateCustomer(@PathVariable Long id, @RequestBody CustomerDTO customerDTO) {
+        customerService.updateCustomer(id, CustomerMapper.toEntity(customerDTO));
+        return ResponseEntity.ok("Customer updated successfully");
     }
 
     @DeleteMapping("/deleteCustomer/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<String> deleteCustomer(@PathVariable Long id) {
         customerService.deleteCustomer(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Customer deleted successfully");
     }
 }
