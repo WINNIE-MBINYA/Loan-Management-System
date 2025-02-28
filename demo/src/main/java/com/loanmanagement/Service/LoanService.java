@@ -1,6 +1,6 @@
 package com.loanmanagement.Service;
 
-import com.loanmanagement.Dto.LoanRequestDTO;
+import com.loanmanagement.Dto.LoanIssuanceDTO;
 import com.loanmanagement.Dto.LoanResponseDTO;
 import com.loanmanagement.Entity.Customer;
 import com.loanmanagement.Entity.Loan;
@@ -9,6 +9,8 @@ import com.loanmanagement.Repository.CustomerRepository;
 import com.loanmanagement.Repository.LoanRepository;
 import com.loanmanagement.Dto.LoanMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,46 +19,47 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class LoanService {
+    @Autowired
+    private LoanRepository loanRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
-    private final LoanRepository loanRepository;
-    private final CustomerRepository customerRepository;
-    private final LoanMapper loanMapper;
+    @Autowired
+    private  LoanMapper loanMapper;
 
     /**
-     * Issues a new loan to a customer.
+     * Allows an ADMIN to issue a loan.
      */
-    @Transactional
-    public LoanResponseDTO issueLoan(LoanRequestDTO loanRequest) {
+    public LoanIssuanceDTO issueLoan(LoanIssuanceDTO loanIssuanceDTO) {
         // Retrieve customer
-        Customer customer = customerRepository.findById(loanRequest.getCustomerId())
+        Customer customer = customerRepository.findById(loanIssuanceDTO.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        // Prevent multiple active loans if required
-        boolean hasActiveLoan = loanRepository.findByCustomer(customer)
-                .stream()
-                .anyMatch(loan -> loan.getStatus() == LoanStatus.ACTIVE);
+        // Convert DTO to Entity
+        Loan loan = new Loan();
+        loan.setCustomer(customer);
+        loan.setPrincipalAmount(loanIssuanceDTO.getPrincipalAmount());
+        loan.setInterestRate(loanIssuanceDTO.getInterestRate());
+        loan.setRepaymentPeriod(loanIssuanceDTO.getRepaymentPeriod());
+        loan.setRepaymentFrequency(loanIssuanceDTO.getRepaymentFrequency());
+        loan.setLoanIssuedDate(LocalDate.now());
 
-        if (hasActiveLoan) {
-            throw new RuntimeException("Customer already has an active loan");
-        }
+        // Save entity
+        loan = loanRepository.save(loan);
 
-        // Create loan entity
-        Loan loan = Loan.builder()
-                .customer(customer)
-                .principalAmount(loanRequest.getPrincipalAmount())
-                .interestRate(loanRequest.getInterestRate())
-                .repaymentPeriod(loanRequest.getRepaymentPeriod())
-                .repaymentFrequency(loanRequest.getRepaymentFrequency())
-                .loanIssuedDate(LocalDate.now())
-                .status(LoanStatus.ACTIVE)
-                .build();
+        // Convert Entity back to DTO to return
+        LoanIssuanceDTO responseDTO = new LoanIssuanceDTO();
+        responseDTO.setCustomerId(loan.getCustomer().getId());
+        responseDTO.setPrincipalAmount(loan.getPrincipalAmount());
+        responseDTO.setInterestRate(loan.getInterestRate());
+        responseDTO.setRepaymentPeriod(loan.getRepaymentPeriod());
+        responseDTO.setRepaymentFrequency(loan.getRepaymentFrequency());
+        responseDTO.setLoanIssuedDate(loan.getLoanIssuedDate());
 
-        loanRepository.save(loan);
-
-        return loanMapper.toDto(loan); // Use LoanMapper for conversion
+        return responseDTO;
     }
+
 
     /**
      * Retrieves all loans for a specific customer.
@@ -67,7 +70,7 @@ public class LoanService {
 
         return loanRepository.findByCustomer(customer)
                 .stream()
-                .map(loanMapper::toDto)  // ✅ Use LoanMapper
+                .map(loanMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -77,7 +80,39 @@ public class LoanService {
     public List<LoanResponseDTO> getLoansByStatus(LoanStatus status) {
         return loanRepository.findByStatus(status)
                 .stream()
-                .map(loanMapper::toDto)  // Use LoanMapper
+                .map(loanMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    // Get a specific loan for a customer
+    public LoanResponseDTO getLoanById(Long loanId, Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        Loan loan = loanRepository.findByIdAndCustomer(loanId, customer)
+                .orElseThrow(() -> new RuntimeException("Loan not found or does not belong to this customer"));
+
+        return loanMapper.toDto(loan);
+    }
+
+    // Update a loan’s status (e.g., mark it as PAID)
+    @Transactional
+    public LoanResponseDTO updateLoanStatus(Long loanId, LoanStatus newStatus) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new RuntimeException("Loan not found"));
+
+        loan.setStatus(newStatus);
+        loanRepository.save(loan);
+
+        return loanMapper.toDto(loan);
+    }
+
+    // Delete a loan by ID (if allowed)
+    @Transactional
+    public void deleteLoan(Long loanId) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new RuntimeException("Loan not found"));
+
+        loanRepository.delete(loan);
     }
 }
