@@ -14,7 +14,7 @@ public class StatisticsService {
     private final PaymentRepository paymentRepository;
 
     public StatisticsDTO getLoanStatistics() {
-        double totalDisbursed = loanRepository.sumTotalLoanAmount();
+        double totalDisbursed = loanRepository.sumTotalPrincipalAmount();
         double totalRepaid = paymentRepository.sumTotalPaymentAmount();
         double outstandingBalance = totalDisbursed - totalRepaid;
 
