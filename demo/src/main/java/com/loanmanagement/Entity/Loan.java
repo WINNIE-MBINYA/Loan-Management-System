@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "loans")
+@Table(name = "loan")
 public class Loan {
 
     @Id
@@ -39,10 +39,21 @@ public class Loan {
     @Column(nullable = false)
     private LocalDate loanIssuedDate;  // Date when the loan was issued
 
-    @Column(nullable = false)
-    private BigDecimal amount;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LoanStatus status; // Active, Paid, Defaulted, Approved, Pending, Rejected
+
+    @Override
+    public String toString() {
+        return "Loan{" +
+                "id=" + id +
+                ", customer=" + customer +
+                ", principalAmount=" + principalAmount +
+                ", interestRate=" + interestRate +
+                ", repaymentPeriod=" + repaymentPeriod +
+                ", repaymentFrequency=" + repaymentFrequency +
+                ", loanIssuedDate=" + loanIssuedDate +
+                ", status=" + status +
+                '}';
+    }
 }
