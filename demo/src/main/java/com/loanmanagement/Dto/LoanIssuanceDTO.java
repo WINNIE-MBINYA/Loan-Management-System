@@ -5,13 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
-public class LoanRequestDTO {
+public class LoanIssuanceDTO {
     private Long customerId;
     private BigDecimal principalAmount;
     private BigDecimal interestRate;
-    private Integer repaymentPeriod;
+    private int repaymentPeriod;
     private RepaymentFrequency repaymentFrequency;
+    private LocalDate loanIssuedDate;;
 }
