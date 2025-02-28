@@ -13,12 +13,16 @@ import java.time.LocalDate;
 @Setter
 @Builder
 public class LoanResponseDTO {
+
     private Long id;
     private Long customerId;
     private BigDecimal principalAmount;
-    private BigDecimal interestRate;
-    private Integer repaymentPeriod;
+    private String interestRate;
+    private Integer repaymentPeriodMonths;
     private RepaymentFrequency repaymentFrequency;
-    private LocalDate loanIssuedDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private LoanStatus status;
+    private BigDecimal remainingAmount;
+    private BigDecimal totalRepayableAmount;
 }
