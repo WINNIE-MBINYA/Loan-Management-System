@@ -30,7 +30,7 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus status; // 🔹 Added missing status field
+    private PaymentStatus status;
 
     @PrePersist
     protected void onCreate() {
@@ -38,7 +38,7 @@ public class Payment {
             this.paymentDate = LocalDateTime.now();
         }
         if (this.status == null) {
-            this.status = PaymentStatus.PENDING; // 🔹 Default to PENDING
+            this.status = PaymentStatus.PENDING; // Default to PENDING
         }
     }
 }
