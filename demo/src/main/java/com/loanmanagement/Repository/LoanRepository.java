@@ -16,13 +16,13 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     // Find all loans for a specific customer
     List<Loan> findByCustomer(Customer customer);
 
-    // Find all active loans
+    // Find loans by status
     List<Loan> findByStatus(LoanStatus status);
 
     // Find a specific loan by ID and ensure it belongs to a customer
     Optional<Loan> findByIdAndCustomer(Long loanId, Customer customer);
 
     // Calculate total amount disbursed (sum of all loan amounts)
-    @Query("SELECT COALESCE(SUM(l.amount), 0) FROM Loan l")
-    double sumTotalLoanAmount();
+    @Query("SELECT COALESCE(SUM(l.principalAmount), 0) FROM Loan l")
+    double sumTotalPrincipalAmount();
 }
