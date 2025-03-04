@@ -1,5 +1,6 @@
 package com.loanmanagement.Controller;
 
+import com.loanmanagement.Dto.RepaymentScheduleDTO;
 import com.loanmanagement.Entity.RepaymentSchedule;
 import com.loanmanagement.Service.RepaymentScheduleService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class RepaymentScheduleController {
     /**
      * Get repayment schedule by Loan ID
      */
-    @GetMapping("/{loanId}")
+    @GetMapping("/getRepaymentSchedule/{loanId}")
     public ResponseEntity<List<RepaymentSchedule>> getRepaymentSchedule(@PathVariable Long loanId) {
         List<RepaymentSchedule> schedule = repaymentScheduleService.getRepaymentScheduleByLoan(loanId);
         return ResponseEntity.ok(schedule);
@@ -27,16 +28,16 @@ public class RepaymentScheduleController {
     /**
      * Generate a repayment schedule for a new loan
      */
-    @PostMapping("/generate/{loanId}")
-    public ResponseEntity<List<RepaymentSchedule>> generateRepaymentSchedule(@PathVariable Long loanId) {
-        List<RepaymentSchedule> schedule = repaymentScheduleService.createScheduleForLoan(loanId);
+    @PostMapping("/generateRepaymentSchedule/{loanId}")
+    public ResponseEntity<List<RepaymentScheduleDTO>> generateRepaymentSchedule(@PathVariable Long loanId) {
+        List<RepaymentScheduleDTO> schedule = repaymentScheduleService.createScheduleForLoan(loanId);
         return ResponseEntity.ok(schedule);
     }
 
     /**
      * Get upcoming repayments for a loan
      */
-    @GetMapping("/upcoming/{loanId}")
+    @GetMapping("/getUpcomingRepayments/{loanId}")
     public ResponseEntity<List<RepaymentSchedule>> getUpcomingRepayments(@PathVariable Long loanId) {
         List<RepaymentSchedule> upcomingPayments = repaymentScheduleService.getUpcomingRepayments(loanId);
         return ResponseEntity.ok(upcomingPayments);
@@ -45,8 +46,8 @@ public class RepaymentScheduleController {
     /**
      * Mark a repayment as paid
      */
-    @PutMapping("/pay/{repaymentId}")
-    public ResponseEntity<String> markAsPaid(@PathVariable Long repaymentId) {
+    @PutMapping("/markRepaymentAsPaid/{repaymentId}")
+    public ResponseEntity<String> markRepaymentAsPaid(@PathVariable Long repaymentId) {
         repaymentScheduleService.markRepaymentAsPaid(repaymentId);
         return ResponseEntity.ok("Repayment marked as paid");
     }
