@@ -9,8 +9,6 @@ import com.loanmanagement.Repository.CustomerRepository;
 import com.loanmanagement.Repository.LoanRepository;
 import com.loanmanagement.Dto.LoanMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,22 +17,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class LoanService {
-    @Autowired
-    private LoanRepository loanRepository;
-    @Autowired
-    private CustomerRepository customerRepository;
 
-    @Autowired
-    private  LoanMapper loanMapper;
+    private final LoanRepository loanRepository;
+    private final CustomerRepository customerRepository;
+    private final LoanMapper loanMapper;
 
     /**
      * Allows an ADMIN to issue a loan.
      */
-    public LoanIssuanceDTO issueLoan(LoanIssuanceDTO loanIssuanceDTO) {
-        // Retrieve customer
-        Customer customer = customerRepository.findById(loanIssuanceDTO.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+    public LoanIssuanceDTO issueLoan(String email, LoanIssuanceDTO loanIssuanceDTO) {
+        // Retrieve customer by email
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer with email " + email + " not found"));
 
         // Convert DTO to Entity
         Loan loan = new Loan();
@@ -44,22 +40,20 @@ public class LoanService {
         loan.setRepaymentPeriod(loanIssuanceDTO.getRepaymentPeriod());
         loan.setRepaymentFrequency(loanIssuanceDTO.getRepaymentFrequency());
         loan.setLoanIssuedDate(LocalDate.now());
+        loan.setStatus(LoanStatus.PENDING); // Default status
 
         // Save entity
         loan = loanRepository.save(loan);
 
         // Convert Entity back to DTO to return
-        LoanIssuanceDTO responseDTO = new LoanIssuanceDTO();
-        responseDTO.setCustomerId(loan.getCustomer().getId());
-        responseDTO.setPrincipalAmount(loan.getPrincipalAmount());
-        responseDTO.setInterestRate(loan.getInterestRate());
-        responseDTO.setRepaymentPeriod(loan.getRepaymentPeriod());
-        responseDTO.setRepaymentFrequency(loan.getRepaymentFrequency());
-        responseDTO.setLoanIssuedDate(loan.getLoanIssuedDate());
-
-        return responseDTO;
+        return new LoanIssuanceDTO(
+                loan.getPrincipalAmount(),
+                loan.getInterestRate(),
+                loan.getRepaymentPeriod(),
+                loan.getRepaymentFrequency(),
+                loan.getLoanIssuedDate()
+        );
     }
-
 
     /**
      * Retrieves all loans for a specific customer.
@@ -93,6 +87,16 @@ public class LoanService {
                 .orElseThrow(() -> new RuntimeException("Loan not found or does not belong to this customer"));
 
         return loanMapper.toDto(loan);
+    }
+
+    /**
+     * Retrieves all loans in the system.
+     */
+    public List<LoanResponseDTO> getAllLoans() {
+        List<Loan> loans = loanRepository.findAll();
+        return loans.stream()
+                .map(loanMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     // Update a loan’s status (e.g., mark it as PAID)
