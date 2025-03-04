@@ -41,7 +41,7 @@ public class Loan {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
-    private LoanStatus status; // Active, Paid, Defaulted, Approved, Pending, Rejected
+    private LoanStatus status = LoanStatus.PENDING;// Active, Paid, Defaulted, Approved, Pending, Rejected
 
     @Override
     public String toString() {
