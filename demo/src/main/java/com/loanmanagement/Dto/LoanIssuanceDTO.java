@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class LoanIssuanceDTO {
     private BigDecimal principalAmount;
     private BigDecimal interestRate;
-    private int repaymentPeriod;
+    private Integer repaymentPeriod;
     private RepaymentFrequency repaymentFrequency;
     private LocalDate loanIssuedDate;
 }
