@@ -1,5 +1,6 @@
 package com.loanmanagement.Service;
 
+import com.loanmanagement.Repository.RepaymentScheduleRepository;
 import com.loanmanagement.Dto.LoanIssuanceDTO;
 import com.loanmanagement.Dto.LoanResponseDTO;
 import com.loanmanagement.Entity.Customer;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class LoanService {
 
     private final LoanRepository loanRepository;
+    private final RepaymentScheduleRepository repaymentScheduleRepository;
     private final CustomerRepository customerRepository;
     private final LoanMapper loanMapper;
 
@@ -108,6 +110,29 @@ public class LoanService {
         loan.setStatus(newStatus);
         loanRepository.save(loan);
 
+        return loanMapper.toDto(loan);
+    }
+
+    @Transactional
+    public LoanResponseDTO editLoan(Long loanId, LoanIssuanceDTO updatedLoan) {
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new RuntimeException("Loan not found"));
+
+        // Update fields if provided (excluding customer & issued date)
+        if (updatedLoan.getPrincipalAmount() != null) {
+            loan.setPrincipalAmount(updatedLoan.getPrincipalAmount());
+        }
+        if (updatedLoan.getInterestRate() != null) {
+            loan.setInterestRate(updatedLoan.getInterestRate());
+        }
+        if (updatedLoan.getRepaymentPeriod() != null) {
+            loan.setRepaymentPeriod(updatedLoan.getRepaymentPeriod());
+        }
+        if (updatedLoan.getRepaymentFrequency() != null) {
+            loan.setRepaymentFrequency(updatedLoan.getRepaymentFrequency());
+        }
+
+        loan = loanRepository.save(loan);
         return loanMapper.toDto(loan);
     }
 
