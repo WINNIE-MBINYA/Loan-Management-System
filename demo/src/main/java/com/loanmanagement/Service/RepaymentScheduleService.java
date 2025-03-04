@@ -1,5 +1,6 @@
 package com.loanmanagement.Service;
 
+import com.loanmanagement.Dto.RepaymentScheduleDTO;
 import com.loanmanagement.Entity.Loan;
 import com.loanmanagement.Entity.RepaymentFrequency;
 import com.loanmanagement.Entity.RepaymentSchedule;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,18 +37,38 @@ public class RepaymentScheduleService {
      * Generate and save repayment schedule for a loan
      */
     @Transactional
-    public List<RepaymentSchedule> createScheduleForLoan(Long loanId) {
+    public List<RepaymentScheduleDTO> createScheduleForLoan(Long loanId) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new RuntimeException("Loan not found"));
 
-        return generateRepaymentSchedule(loan);
+        List<RepaymentSchedule> scheduleList = generateRepaymentSchedule(loan);
+
+        // Save generated schedule
+        repaymentScheduleRepository.saveAll(scheduleList);
+
+        // Convert Entity to DTO
+        return scheduleList.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Convert RepaymentSchedule entity to RepaymentScheduleDTO
+     */
+    private RepaymentScheduleDTO convertToDTO(RepaymentSchedule schedule) {
+        return new RepaymentScheduleDTO(
+                schedule.getId(),
+                schedule.getLoan().getId(),
+                schedule.getDueDate(),
+                schedule.getAmountDue(),
+                schedule.getStatus()
+        );
     }
 
     /**
      * Generate repayment schedule for a given loan
      */
-    @Transactional
-    public List<RepaymentSchedule> generateRepaymentSchedule(Loan loan) {
+    private List<RepaymentSchedule> generateRepaymentSchedule(Loan loan) {
         List<RepaymentSchedule> scheduleList = new ArrayList<>();
         int numberOfInstallments = calculateInstallments(loan);
         BigDecimal installmentAmount = calculateInstallmentAmount(loan, numberOfInstallments);
@@ -65,8 +87,7 @@ public class RepaymentScheduleService {
 
             scheduleList.add(schedule);
         }
-
-        return repaymentScheduleRepository.saveAll(scheduleList);
+        return scheduleList;
     }
 
     /**
@@ -75,7 +96,6 @@ public class RepaymentScheduleService {
     public List<RepaymentSchedule> getUpcomingRepayments(Long loanId) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new RuntimeException("Loan not found"));
-
         return repaymentScheduleRepository.findByLoanAndStatus(loan, PaymentStatus.PENDING);
     }
 
@@ -86,7 +106,6 @@ public class RepaymentScheduleService {
     public void markRepaymentAsPaid(Long repaymentId) {
         RepaymentSchedule schedule = repaymentScheduleRepository.findById(repaymentId)
                 .orElseThrow(() -> new RuntimeException("Repayment schedule not found"));
-
         schedule.setStatus(PaymentStatus.PAID);
         repaymentScheduleRepository.save(schedule);
     }
@@ -104,13 +123,10 @@ public class RepaymentScheduleService {
     }
 
     /**
-     * Calculate installment amount (principal + interest)
+     * Calculate installment amount (principal divided equally)
      */
     private BigDecimal calculateInstallmentAmount(Loan loan, int numberOfInstallments) {
-        BigDecimal interestRate = loan.getInterestRate().divide(BigDecimal.valueOf(100));
-        BigDecimal totalRepayment = loan.getPrincipalAmount().multiply(interestRate.add(BigDecimal.ONE));
-
-        return totalRepayment.divide(BigDecimal.valueOf(numberOfInstallments), 2, BigDecimal.ROUND_HALF_UP);
+        return loan.getPrincipalAmount().divide(BigDecimal.valueOf(numberOfInstallments), 2, BigDecimal.ROUND_HALF_UP);
     }
 
     /**
