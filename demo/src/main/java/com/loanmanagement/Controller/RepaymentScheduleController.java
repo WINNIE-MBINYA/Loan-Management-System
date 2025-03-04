@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/repayments")
@@ -20,9 +21,19 @@ public class RepaymentScheduleController {
      * Get repayment schedule by Loan ID
      */
     @GetMapping("/getRepaymentSchedule/{loanId}")
-    public ResponseEntity<List<RepaymentSchedule>> getRepaymentSchedule(@PathVariable Long loanId) {
-        List<RepaymentSchedule> schedule = repaymentScheduleService.getRepaymentScheduleByLoan(loanId);
-        return ResponseEntity.ok(schedule);
+    public ResponseEntity<List<RepaymentScheduleDTO>> getRepaymentSchedule(@PathVariable Long loanId) {
+        List<RepaymentSchedule> schedules = repaymentScheduleService.getRepaymentScheduleByLoan(loanId);
+
+        List<RepaymentScheduleDTO> scheduleDTOs = schedules.stream()
+                .map(schedule -> new RepaymentScheduleDTO(
+                        schedule.getId(),
+                        schedule.getLoan().getId(),
+                        schedule.getDueDate(),
+                        schedule.getAmountDue(),
+                        schedule.getStatus()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(scheduleDTOs);
     }
 
     /**
@@ -38,9 +49,20 @@ public class RepaymentScheduleController {
      * Get upcoming repayments for a loan
      */
     @GetMapping("/getUpcomingRepayments/{loanId}")
-    public ResponseEntity<List<RepaymentSchedule>> getUpcomingRepayments(@PathVariable Long loanId) {
+    public ResponseEntity<List<RepaymentScheduleDTO>> getUpcomingRepayments(@PathVariable Long loanId) {
         List<RepaymentSchedule> upcomingPayments = repaymentScheduleService.getUpcomingRepayments(loanId);
-        return ResponseEntity.ok(upcomingPayments);
+
+        // Convert to DTOs
+        List<RepaymentScheduleDTO> scheduleDTOs = upcomingPayments.stream()
+                .map(schedule -> new RepaymentScheduleDTO(
+                        schedule.getId(),
+                        schedule.getLoan().getId(),
+                        schedule.getDueDate(),
+                        schedule.getAmountDue(),
+                        schedule.getStatus()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(scheduleDTOs);
     }
 
     /**
