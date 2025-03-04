@@ -81,6 +81,19 @@ public class LoanController {
     }
 
     /**
+     * Edit loan details (Admin only)
+     */
+    @PutMapping("/editLoan/{loanId}")
+    public ResponseEntity<?> editLoan(@PathVariable Long loanId, @RequestBody LoanIssuanceDTO updatedLoan) {
+        try {
+            LoanResponseDTO loan = loanService.editLoan(loanId, updatedLoan);
+            return ResponseEntity.ok(new LoanResponsesDto<>("Loan updated successfully", HttpStatus.OK.value(), loan));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new LoanResponsesDto<>("Loan update failed", HttpStatus.BAD_REQUEST.value(), null));
+        }
+    }
+
+    /**
      * Delete a loan by ID
      */
     @DeleteMapping("deleteLoan/{loanId}")
