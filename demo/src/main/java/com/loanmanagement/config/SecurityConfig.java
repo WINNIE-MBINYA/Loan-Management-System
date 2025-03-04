@@ -36,6 +36,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/customers/**").permitAll()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/api/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "http://localhost:8080/swagger-ui/index.html",
+                                "/api/auth/register", // Make sure register is permitted
+                                "/api/auth/login"
+
+                                // Make sure login is permitted
+                        ).permitAll()
                         .requestMatchers("/api/loans/**", "/api/payments/**", "/api/repayments/**").permitAll()
                         .anyRequest().authenticated()
                 )
