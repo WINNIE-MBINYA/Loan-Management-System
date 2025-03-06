@@ -126,7 +126,7 @@ GET /api/statistics/pendingPayments
 
 ### Clone the Repository
 ```sh
-git clone https://github.com/WINNIE-MBINYA/loan-management-system.git
+git clone https://github.com/WINNIE-MBINYA/Loan-Management-System.git
 cd loan-management-system
 ```
 
